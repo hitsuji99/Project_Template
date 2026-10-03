@@ -74,9 +74,8 @@ signInForm.addEventListener("submit", function(e) {
     loginToast.classList.remove("hidden");
     msg.classList.add("show");
 
-    setTimeout(function () {
     window.location.href = "./dashboard.html";
-    }, 1000);
+    
 }) ;
 
 // nut X 

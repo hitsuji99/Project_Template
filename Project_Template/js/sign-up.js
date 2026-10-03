@@ -161,10 +161,8 @@ form.addEventListener("submit", function (e) {
     localStorage.setItem("users", JSON.stringify(users));
 
     localStorage.setItem("signUpSuccess", "Đăng ký thành công");
-
-    setTimeout(function () {
+    
         window.location.href = "./sign-in.html";
-    }, 1000);
 }
 });
 
