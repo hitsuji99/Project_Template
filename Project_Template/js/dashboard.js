@@ -1,169 +1,71 @@
-// lay cac phan tu trong dashboard
-const tableBody = document.querySelector("#table-body");
+// lay du lieu localStorage
+let userList = JSON.parse(localStorage.getItem("userList")) || [];
 
-const searchBox = document.querySelector("#search-box");
+// lay phan tu tbody
+let tBody = document.getElementById("table-body");
 
-const paginationList = document.querySelector("#pagination-list");
+// hien thi bang tu du lieu users trong localStorage
+function renderUsers() {
+  tBody.innerHTML = ""; // xoa du lieu cu
 
-const arrowLeft = document.querySelector(".arrow-left");
+  userList.forEach((user) => {
+     // nếu muốn đổi ngược thứ tự hiển thì dùng    for (let i = userList.length - 1; i >= 0; i--) {
+     // let user = userList[i];
 
-const arrowRight = document.querySelector(".arrow-right");
-
-// so user hien thi tren 1 trang
-const PAGE_SIZE = 5;
-
-let users = []; // toan bo user trong localStorage
-let showUsers = []; // user hien thi (sau khi search)
-let currentPage = 1; // trang hien tai
-
-//lay danh sach user tu localStorage
-function loadUsers() {
-  const usersText = localStorage.getItem("users");
-    if (usersText === null) {
-        users = [];
-    } else {
-        users = JSON.parse(usersText);
-    }   
-
-    showUsers = users; // hien thi toan bo user khi load
-}
-
-//  1--- hien thi bang tu du lieu trong users trong localStorage
-function renderTable() {
-  // xoa toan bo du lieu hien thi trong bang
-  tableBody.innerHTML = "";
-    const start = (currentPage - 1) * PAGE_SIZE;
-    const pageUsers = showUsers.slice(start, start + PAGE_SIZE);
-
-    pageUsers.forEach((user) => {
-        const row = document.createElement("tr");
-        const statusClass = user.status === "active" ? "active" : "deactive";
-        const statusText = user.status === "active" ? "Active" : "Deactive";
- 
-        row.innerHTML =
-            "<td>" + user.userCode + "</td>" +
-            "<td>" + user.username + "</td>" +
-            "<td>" + user.email + "</td>" +
-            '<td class="uppercase">' + user.role + "</td>" +
-            "<td>" + user.birthday + "</td>" +
-            "<td>" +
-                '<span class="status-cell ' + statusClass + '">' +
-                    '<span class="dot"></span>' + statusText +
-                "</span>" +
-            "</td>" +
-            "<td>" +
-                '<i class="fa-solid fa-trash"></i>' +
-                '<i class="fa-solid fa-pen"></i>' +
-            "</td>";
-                    // gan email vao dong de biet dang thao tac voi user nao
-
-
-        row.dataset.email = user.email; // them thuoc tinh email vao row
-        tableBody.appendChild(row);
-    });
-}
-//  2--- Tính năng xoá từng hàng, từng bản ghi trong bảng dữ liệu users
-tableBody.addEventListener("click", function (e) {
-    const row = e.target.closest("tr");
-    if (!row) {
-
-            return;
-}
-
-const email = row.dataset.email; 
-
-// bam icon de xoa user
-if (e.target.classList.contains("fa-trash")) {
-       const confirmDelete = confirm("Bạn có chắc muốn xoá người dùng " + email + " không?");
-
-    if (!confirmDelete) {
-        return;
+    // duyet tung user
+    let statusClass = "deactive";
+    if (user.status === "Active") {
+      statusClass = "active";
     }
 
-    // bo user co email ra khoi danh sach users
-    users = users.filter(function (user) {
-        return user.email !== email;
-    });
+    let tr = document.createElement("tr"); // tao <tr>
 
-    //luu lai danh sach users moi vao localStorage
-    localStorage.setItem("users", JSON.stringify(users));
+    // them noi dung (id cua icon la usercode cua user)
+    tr.innerHTML = `
+      <td>${user.usercode}</td>
+      <td>${user.username}</td>
+      <td>${user.email}</td>
+      <td class="uppercase">${user.role}</td>
+      <td>${user.birthday}</td>
+      <td>
+        <span class="status-cell ${statusClass}">
+          <span class="dot"></span>${user.status}
+        </span>
+      </td>
+      <td>
+        <i id="${user.usercode}" class="fa-solid fa-trash"></i>
+        <i id="${user.usercode}" class="fa-solid fa-pen"></i>
+      </td>
+    `;
 
-    // loc va ve lai bang hien thi
-    search();
+    tBody.appendChild(tr); // dua <tr> vao <tbody>
+  });
 }
 
-// sang trang edit user
-if (e.target.classList.contains("fa-pen")) {
-    // chuyen sang trang edit user
-    window.location.href = "edit-user.html?email=" + encodeURIComponent(email);
-}
+renderUsers();
+
+// bam vao icon trong bang
+tBody.addEventListener("click", function (e) {
+  // bam icon thung rac de xoa
+  if (e.target.classList.contains("fa-trash")) {
+    let deleteID = e.target.id;
+
+    if (confirm("Bạn có chắc muốn xoá người dùng này không?")) {
+      let deleteIndex = userList.findIndex((user) => user.usercode === deleteID);
+
+      userList.splice(deleteIndex, 1);
+
+      // luu lai vao localStorage
+      localStorage.setItem("userList", JSON.stringify(userList));
+
+      renderUsers();
+    }
+  }
+
+  // bam icon cay but de sang trang edit
+  if (e.target.classList.contains("fa-pen")) {
+    // luu ma user can sua, trang edit se lay ra dung
+    localStorage.setItem("editUserCode", e.target.id);
+    window.location.href = "edit-user.html";
+  }
 });
-
-//  3--- tim kiem user theo name --- 
-function search() {
-    const searchValue = searchBox.value.trim().toLowerCase();
-    if (searchValue === "") {
-        showUsers = users; // hien thi toan bo user khi search rong
-    } else {
-        showUsers = users.filter(function (user) {
-            return user.username.toLowerCase().includes(searchValue);
-        });
-    }
-
-    // tim xong thi quay ve trang 1
-    currentPage = 1;
-    renderTable();
-    renderPagination();
-}
-
-searchBox.addEventListener("input", search);
-
-// 4--- Tính năng hiển thị số trang tương ứng 5 đối tượng trên 1 trang
-function renderPagination() {
-    paginationList.innerHTML = "";
-    const totalPages = Math.ceil(showUsers.length / PAGE_SIZE);
-
-    for (let page = 1; page <= totalPages; page++) {
-        const item = document.createElement("li");
-        item.textContent = page;
-        item.className = "pagination-element";
-
-        // to mau trang hien tai
-        if (page === currentPage) {
-            item.classList.add("highlight");
-        }
-
-        // click vao so trang de chuyen trang
-        item.addEventListener("click", function () {
-            currentPage = page;
-            renderTable();
-            renderPagination();
-        });
-        
-        paginationList.appendChild(item);
-    }
-}
-
-// 5--- Tính năng chuyển trang bằng mũi tên
-arrowLeft.addEventListener("click", function () {
-    if (currentPage > 1) {
-        currentPage--;
-        renderTable();
-        renderPagination();
-    }
-});
-
-arrowRight.addEventListener("click", function () {
-    const totalPages = Math.ceil(showUsers.length / PAGE_SIZE);
-    if (currentPage < totalPages) {
-        currentPage++;
-        renderTable();
-        renderPagination();
-    }
-});
-
-// chay cac ham khi load trang
-loadUsers();
-renderTable();
-renderPagination();
-

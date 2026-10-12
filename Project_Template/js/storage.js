@@ -1082,4 +1082,7 @@ const users = [
   },
 ];
 
-localStorage.setItem('userList', JSON.stringify(users));
+// Chỉ nạp dữ liệu mẫu lần đầu, tránh ghi đè user đã đăng ký
+if (localStorage.getItem('userList') === null) {
+  localStorage.setItem('userList', JSON.stringify(users));
+}

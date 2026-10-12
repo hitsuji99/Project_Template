@@ -1,168 +1,72 @@
-// Lấy các phần tử cần dùng
+// lay du lieu localStorage
+const userList = JSON.parse(localStorage.getItem("userList")) || [];
+
 const form = document.getElementById("sign-up-form");
-const email = document.getElementById("email");
-const username = document.getElementById("username");
-const password = document.getElementById("password");
-// lấy các khu vực thông báo
-const validation = document.getElementById("sign-up-validation");
-const signUpError = document.getElementById("sign-up-error");
-const signUpToast = document.getElementById("sign-up-toast");
+
+
 const msg = document.getElementById("msg");
-// Lấy 3 thông báo "không được bỏ trống"
-const passwordBlank = document.querySelector(".password-cannot-blank");
-const usernameBlank = document.querySelector(".username-cannot-blank");
-const emailBlank = document.querySelector(".email-cannot-blank");
-// Lấy các thông báo lỗi còn lại
-const emailError = document.querySelector(".email-error");
-// Password tối thiểu 8
-const passwordMinLengthError = document.querySelector(
-  ".password-min-length-error",
-);
-// Password phải có số
-const passwordNumberError = document.querySelector(
-  ".password-number-required-error",
-);
-// phải có chữ hoa + chữ thường
-const passwordCaseError = document.querySelector(
-  ".password-uppercase-lowercase-error",
-);
-form.noValidate = true;
-passwordBlank.classList.add("hidden");
-usernameBlank.classList.add("hidden");
-emailBlank.classList.add("hidden");
-// mỗi lần submit chúng ta phải reset lỗi trước.
+const validation = document.getElementById("sign-up-validation");
+const emailError = document.querySelector(".email-cannot-blank");
+const userError = document.querySelector(".username-cannot-blank");
+const passwordError = document.querySelector(".password-cannot-blank");
+
+// regex
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]{2,15}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
 form.addEventListener("submit", function (e) {
-   e.preventDefault();
+  e.preventDefault();
 
-  // Mặc định cho rằng dữ liệu hợp lệ
-  let blankError = false;
-  let formatError = false;
+  const email = document.getElementById("email").value.trim();
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
 
-  // Ẩn lỗi cũ trước
-  emailBlank.classList.add("hidden");
-  usernameBlank.classList.add("hidden");
-  passwordBlank.classList.add("hidden");
-
+  // reset cac loi
+  emailError.innerText = "";
+  userError.innerText = "";
+  passwordError.innerText = "";
   validation.classList.add("hidden");
-
   msg.classList.remove("show");
 
-  emailError.classList.add("hidden");
-  passwordMinLengthError.classList.add("hidden");
-  passwordNumberError.classList.add("hidden");
-  passwordCaseError.classList.add("hidden");
+  let isValid = true;
+  const checkEmail = userList.some((u) => u.email === email);
 
-  signUpError.classList.add("hidden");
-  signUpToast.classList.add("hidden");
-
-  // Username không được để trống
-
-  if (username.value.trim() === "") {
-    usernameBlank.classList.remove("hidden");
-
-    blankError = true;
+  if (!emailRegex.test(email)) {
+    emailError.innerText = "Email không hợp lệ";
+    isValid = false;
   }
 
-  // Email không được để trống
-
-  if (email.value.trim() === "") {
-    emailBlank.classList.remove("hidden");
-   
-
-   blankError = true;
+  if (!usernameRegex.test(username)) {
+    userError.innerText = "Username không hợp lệ";
+    isValid = false;
   }
 
-  // Email đúng định dạng
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (email.value.trim() !== "" && !emailRegex.test(email.value.trim())) {
-    emailError.classList.remove("hidden");
-
-    formatError = true;
+  if (!passwordRegex.test(password)) {
+    passwordError.innerText = "Password không hợp lệ";
+    isValid = false;
   }
 
-  // Password không được để trống
-
-  if (password.value.trim() === "") {
-    passwordBlank.classList.remove("hidden");
+  // co loi thi hien khung thong bao
+  if (!isValid) {
     validation.classList.remove("hidden");
-
-    blankError = true;
-  }
-
-  // Password tối thiểu 8 ký tự
-
-  if (password.value.trim() !== "" && password.value.trim().length < 8) {
-    passwordMinLengthError.classList.remove("hidden");
-
-    formatError = true;
-  }
-
-  // Password phải có chữ số
-
-  const numberRegex = /[0-9]/;
-
-  if (password.value.trim() !== "" && !numberRegex.test(password.value.trim())) {
-    passwordNumberError.classList.remove("hidden");
-
-    formatError = true;
-  }
-
-  // Password phải có chữ hoa + chữ thường
-
-  const lowercaseRegex = /[a-z]/;
-  const uppercaseRegex = /[A-Z]/;
-
-  if (
-    password.value.trim() !== "" &&
-    (!lowercaseRegex.test(password.value.trim()) ||
-      !uppercaseRegex.test(password.value.trim()))
-  ) {
-    passwordCaseError.classList.remove("hidden");
-
-    formatError = true;
-  }
-
-  // Có lỗi thì hiện thông báo
-
-  if (blankError === true || formatError === true) {
     msg.classList.add("show");
-
-    if (blankError === true) {
-        validation.classList.remove("hidden");
-    }
-    if (formatError === true) {
-    // Nếu email format hoặc password có lỗi
-    signUpError.classList.remove("hidden");
+    return;
   }
-}
-  // Nếu tất cả đều hợp lệ
 
-  if (blankError ===  false && formatError === false) {
-    msg.classList.add("show");
-    signUpToast.classList.remove("hidden");
+  // dang ky thanh cong
+  const newUser = {
+    usercode: "U" + Date.now(),
+    username: username,
+    email: email,
+    password: password,
+    role: "user",
+    birthday: "",
+    status: "Active",
+    description: "",
+  };
 
-     // Lấy danh sách người dùng đã đăng ký từ localStorage
-    const usersText = localStorage.getItem("users");
-    let users = [];
-
-    if (usersText !== null) {
-        users = JSON.parse(usersText);
-    }
-    // Thêm người dùng mới vào cuoi danh sách
-
-    users.push({
-        email: email.value.trim(),
-        username: username.value.trim(),
-        password: password.value.trim(),
-    });
-    // lưu danh sách người dùng vào localStorage
-    localStorage.setItem("users", JSON.stringify(users));
-
-    localStorage.setItem("signUpSuccess", "Đăng ký thành công");
-    
-        window.location.href = "./sign-in.html";
-}
+  userList.push(newUser);  // nếu muốn thêm user mới lên đầu tiên thì dùng unshift thay vì push userList.unshift(newUser);
+  localStorage.setItem("userList", JSON.stringify(userList));
+  window.location.href = "./sign-in.html";
 });
-

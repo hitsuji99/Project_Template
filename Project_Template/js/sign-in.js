@@ -1,85 +1,69 @@
+// lay du lieu localStorage
+const userList = JSON.parse(localStorage.getItem("userList")) || [];
 
-// lấy các phần tử 
-const signInForm = document.querySelector("#sign-in-form");
-const email = document.querySelector("#email");
-const password = document.querySelector("#password");
+// lay cac phan tu can dung
+const form = document.getElementById("sign-in-form");
 
-const loginValidation = document.querySelector("#login-validation");
-const emailCannotBlank = document.querySelector(".email-cannot-blank");
-const passwordCannotBlank = document.querySelector(".password-cannot-blank");
+const msg = document.getElementById("msg");
+const loginValidation = document.getElementById("login-validation");
+const emailBlank = document.querySelector(".email-cannot-blank");
+const passwordBlank = document.querySelector(".password-cannot-blank");
+const loginToast = document.getElementById("login-toast");
+const loginError = document.getElementById("login-error");
 const closeBtn = document.querySelector(".close-btn");
 
-const loginToast = document.querySelector("#login-toast");
-const loginError = document.querySelector("#login-error");
-const msg = document.querySelector("#msg");
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
 
-// an tat ca thong bao 
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-function hideAllMessages() {
-    loginValidation.classList.add("hidden");
-    emailCannotBlank.classList.add("hidden");
-    passwordCannotBlank.classList.add("hidden");
-    loginToast.classList.add("hidden");
-    loginError.classList.add("hidden");
-    msg.classList.remove("show");
-}
+  // an tat ca thong bao cu
+  loginValidation.classList.add("hidden");
+  emailBlank.classList.add("hidden");
+  passwordBlank.classList.add("hidden");
+  loginToast.classList.add("hidden");
+  loginError.classList.add("hidden");
+  msg.classList.remove("show");
 
-signInForm.addEventListener("submit", function(e) {
-    e.preventDefault();
+  // email, password khong duoc de trong
+  let isValid = true;
 
-    hideAllMessages();
+  if (email === "") {
+    emailBlank.classList.remove("hidden");
+    isValid = false;
+  }
 
-    const emailValue = email.value.trim();
-    const passwordValue = password.value.trim();
+  if (password === "") {
+    passwordBlank.classList.remove("hidden");
+    isValid = false;
+  }
 
-    // email ko duoc de trong 
-    if (emailValue === "") {
-        emailCannotBlank.classList.remove("hidden");
-        loginValidation.classList.remove("hidden");
-        msg.classList.add("show");
-        email.focus();  // con trỏ nhảy vào ô email
-        return;
-    }
-    // mat khau ko duoc de trong
-    if (passwordValue === "") {
-        passwordCannotBlank.classList.remove("hidden");
-        loginValidation.classList.remove("hidden");
-        msg.classList.add("show");
-        password.focus();
-        return;
-    }
-
-    // lay danh sach nguoi dung da dang ky 
-    const usersText = localStorage.getItem("users");
-    let users = [];
-
-    if(usersText !== null) {
-        users = JSON.parse(usersText);
-    }
-
-    // tim nguoi dung khop voi ca email va password 
-    const user = users.find( function (u) {
-        return u.email === emailValue && u.password === passwordValue;        
-    });
-
-    // email hoac password ko ton tai
-    if (!user) {
-        loginError.classList.remove("hidden");
-        msg.classList.add("show");
-        return;
-    }
-
-    // dang nhap thanh cong, chuyen dashboard
-    localStorage.setItem("loggedInUser", JSON.stringify(user));
-    loginToast.classList.remove("hidden");
+  if (!isValid) {
+    loginValidation.classList.remove("hidden");
     msg.classList.add("show");
+    return;
+  }
 
-    window.location.href = "./dashboard.html";
-    
-}) ;
+  // tim user khop ca email va password
+  const result = userList.find((u) => u.email === email && u.password === password);
 
-// nut X 
+  if (!result) {
+    loginError.classList.remove("hidden");
+    msg.classList.add("show");
+    return;
+  }
+
+  // dang nhap thanh cong: luu user dang dang nhap roi sang dashboard
+  localStorage.setItem("userLoggedIn", JSON.stringify(result));
+  loginToast.classList.remove("hidden");
+  msg.classList.add("show");
+
+    window.location.href = "dashboard.html";
+});
+
+// nut X tat thong bao loi
 closeBtn.addEventListener("click", function () {
-    loginValidation.classList.add("hidden");
-     msg.classList.remove("show");
+  loginValidation.classList.add("hidden");
+  msg.classList.remove("show");
 });

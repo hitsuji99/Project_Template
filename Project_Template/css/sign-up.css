@@ -175,6 +175,11 @@
   display: none;
 }
 
+#email-cannot-blank #username-cannot-blank #password-cannot-blank {
+  color: #e8132a;
+  display: none;
+  
+}
 /* MOBILE */
 @media (max-width: 768px) {
   body {
