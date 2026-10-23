@@ -21,7 +21,7 @@
 
 Ký hiệu Chen (hình chữ nhật = thực thể, hình elip = thuộc tính, gạch chân = khóa chính):
 
-![ERD SinhVien](erd-sinhvien.png)
+![ERD SinhVien](erd/erd-sinhvien.png)
 
 Dạng bảng (như MySQL Workbench hiển thị):
 
@@ -42,14 +42,14 @@ erDiagram
 ## 4. Cách làm trong MySQL Workbench
 
 1. Mở MySQL Workbench và kết nối tới MySQL Server (Local instance).
-2. **File → Open SQL Script…** rồi chọn `sinhvien.sql`.
+2. **File → Open SQL Script…** rồi chọn `scripts/sinhvien.sql`.
 3. Bấm biểu tượng ⚡ (Execute) để tạo database `QuanLySinhVien`, bảng `SinhVien` và dữ liệu mẫu.
 4. Vẽ ERD tự động: **Database → Reverse Engineer…** → chọn kết nối → chọn schema `QuanLySinhVien` → Next đến hết → Finish.
    Workbench sẽ sinh sơ đồ EER có bảng `SinhVien` (biểu tượng chìa khóa vàng là khóa chính `MaSV`).
-5. Lưu mô hình: **File → Save Model As…** → `sinhvien.mwb`; xuất ảnh: **File → Export → Export as PNG…**.
+5. Lưu mô hình: **File → Save Model As…** → `erd/sinhvien.mwb`; xuất ảnh: **File → Export → Export as PNG…**.
 6. Đưa các file lên GitHub và nộp link repository.
 
 ## 5. File trong thư mục
 
-- `sinhvien.sql` – script tạo database, bảng và dữ liệu mẫu
-- `erd-sinhvien.svg`, `erd-sinhvien.png` – sơ đồ ERD thực thể SinhVien
+- `scripts/sinhvien.sql` – script tạo database, bảng và dữ liệu mẫu
+- `erd/erd-sinhvien.svg`, `erd/erd-sinhvien.png` – sơ đồ ERD thực thể SinhVien
